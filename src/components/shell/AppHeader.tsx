@@ -16,8 +16,9 @@ export function AppHeader({ state, profile }: { state: AppState; profile: Profil
   const budget = weeklyBudgetStatus(profile, state.pantry, todayIso());
   const avatar = (state.personaId && getPersona(state.personaId)?.emoji) || "🙂";
 
+  // Not sticky: it scrolls away with the page, so it never covers content.
   return (
-    <header className="sticky top-0 z-30 bg-forest">
+    <header className="bg-forest">
       <div className="mx-auto flex h-16 max-w-md items-center justify-between gap-3 px-5">
         <Logo tone="dark" size={30} />
 

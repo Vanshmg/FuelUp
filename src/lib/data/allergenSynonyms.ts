@@ -28,7 +28,7 @@ export const ALLERGEN_SYNONYMS: Record<AvoidTag, string[]> = {
   egg: [
     "egg", "eggs", "omelet", "omelette", "frittata", "mayo", "mayonnaise", "aioli", "french toast",
     "quiche", "custard", "meringue", "shakshuka", "carbonara", "hollandaise", "egg roll", "anda",
-    "bhurji", "caesar", "tamagoyaki", "kewpie",
+    "caesar", "tamagoyaki", "kewpie",
   ],
   soy: ["soy", "soya", "tofu", "edamame", "tempeh", "miso", "shoyu", "tamari", "teriyaki", "natto"],
   wheat: [

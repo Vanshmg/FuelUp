@@ -11,6 +11,11 @@ describe("tagsInText (second layer: scanning meal names)", () => {
     expect(tagsInText("Aloo paratha with ghee", ["dairy"])).toEqual(["dairy"]);
   });
 
+  it("doesn't treat a cooking style as an ingredient (paneer bhurji has no egg)", () => {
+    expect(tagsInText("Paneer bhurji wrap", ["egg"])).toEqual([]);
+    expect(tagsInText("Egg bhurji + roti", ["egg"])).toEqual(["egg"]);
+  });
+
   it("matches whole words and plurals only", () => {
     expect(tagsInText("Eggplant parmesan", ["egg"])).toEqual([]);
     expect(tagsInText("Deviled eggs", ["egg"])).toEqual(["egg"]);

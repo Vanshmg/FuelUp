@@ -5,7 +5,8 @@ import { PlusIcon } from "@/components/ui/icons";
 import { Sheet } from "@/components/ui/Sheet";
 
 /**
- * The floating "+ Log" button, available on every tab.
+ * "+ Log", available on every tab. It lives IN the tab bar (not floating
+ * over the page), so it can never cover content.
  * Phase 8 turns the sheet into the real quick-log box.
  */
 export function LogButton() {
@@ -13,16 +14,14 @@ export function LogButton() {
 
   return (
     <>
-      <div className="pointer-events-none fixed inset-x-0 bottom-[5.25rem] z-30 mx-auto flex max-w-md justify-end px-5">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="pointer-events-auto flex min-h-13 items-center gap-2 rounded-full bg-orange px-5 font-bold text-forest-deep shadow-lift transition-transform duration-150 hover:scale-[1.04] active:scale-[0.94]"
-        >
-          <PlusIcon width={20} height={20} />
-          Log
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex min-h-11 items-center gap-1.5 rounded-full bg-orange px-4 font-bold text-forest-deep shadow-lift transition-transform duration-150 hover:scale-[1.04] active:scale-[0.94]"
+      >
+        <PlusIcon width={18} height={18} />
+        Log
+      </button>
 
       <Sheet open={open} onClose={() => setOpen(false)} title="What did you have?">
         <div className="flex flex-col gap-3">

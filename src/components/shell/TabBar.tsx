@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BasketIcon, PlateIcon, SparkIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
+import { LogButton } from "./LogButton";
 
 const TABS = [
   { href: "/today", label: "Today", Icon: PlateIcon },
@@ -16,7 +17,7 @@ export function TabBar() {
 
   return (
     <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 bg-forest">
-      <ul className="mx-auto flex max-w-md justify-around px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <ul className="mx-auto flex max-w-md items-center justify-around px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {TABS.map(({ href, label, Icon }) => {
           const active = pathname.startsWith(href);
           return (
@@ -42,6 +43,9 @@ export function TabBar() {
             </li>
           );
         })}
+        <li className="flex flex-1 justify-center pt-1">
+          <LogButton />
+        </li>
       </ul>
     </nav>
   );

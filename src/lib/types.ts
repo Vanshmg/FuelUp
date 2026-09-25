@@ -202,12 +202,23 @@ export const DayPlanSchema = z.object({
 });
 export type DayPlan = z.infer<typeof DayPlanSchema>;
 
+/** A meal slot left empty because nothing safe could be found. The UI offers "tap to regenerate". */
+export const PlanGapSchema = z.object({
+  date: IsoDateSchema,
+  slot: MealSlotSchema,
+  mealName: z.string(),
+  reasons: z.array(z.string()),
+});
+export type PlanGap = z.infer<typeof PlanGapSchema>;
+
 export const WeekPlanSchema = z.object({
   id: z.string(),
   startDate: IsoDateSchema,
   createdAt: z.string(),
   source: z.enum(["ai", "fallback", "demo"]),
   days: z.array(DayPlanSchema).min(1).max(7),
+  /** Optional (added in Phase 5), so plans saved before it still load. */
+  gaps: z.array(PlanGapSchema).optional(),
 });
 export type WeekPlan = z.infer<typeof WeekPlanSchema>;
 

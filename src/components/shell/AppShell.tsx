@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useAppState, useHydrated } from "@/hooks/useAppState";
 import { getLoadNotices } from "@/lib/storage";
 import { AppHeader } from "./AppHeader";
-import { LogButton } from "./LogButton";
 import { TabBar } from "./TabBar";
 
 /** Header + page + tab bar + "+ Log". Sends you to onboarding if there's no profile yet. */
@@ -24,8 +23,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const notices = dismissedNotices ? [] : getLoadNotices();
 
+  // Bottom padding = tab bar height + breathing room, so nothing hides behind it.
   return (
-    <div className="min-h-dvh pb-40">
+    <div className="min-h-dvh pb-32">
       <AppHeader state={state} profile={state.profile} />
       {notices.length > 0 && (
         <div role="status" className="mx-auto mt-3 flex max-w-md items-start gap-3 px-5">
@@ -39,7 +39,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
       <main className="mx-auto max-w-md px-5 pt-5">{children}</main>
-      <LogButton />
       <TabBar />
     </div>
   );
