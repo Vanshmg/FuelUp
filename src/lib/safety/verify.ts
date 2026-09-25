@@ -72,28 +72,41 @@ function checkPantryLinks({ date, meal }: DatedMeal, pantry: readonly PantryItem
 
 /**
  * Fresh groceries are assumed bought at the start of the plan. If a meal
- * uses a perishable after it would go bad, warn (freezing on shopping day
- * fixes it). Skipped if a pantry item of that food is still good that day.
+ * uses one after it would go bad:
+ * - HIGH-RISK food (raw meat, poultry, fish, eggs, dairy) → BLOCK, so the
+ *   retry moves the meal earlier. Food safety isn't negotiable.
+ * - Anything else (produce) → warning; it's a quality issue.
+ * Skipped if a pantry item of that food is still good that day.
  */
 function checkPerishables({ date, meal }: DatedMeal, plan: WeekPlan, pantry: readonly PantryItem[]): SafetyIssue[] {
   if (meal.leftoverOf) return [];
   const issues: SafetyIssue[] = [];
+  const where = describePlace({ date, slot: meal.slot });
+  const base = { mealId: meal.id, date, slot: meal.slot };
+
   for (const item of meal.items) {
     if (item.pantryItemId) continue;
     const coveredAtHome = pantry.some((p) => p.kind === "grocery" && p.foodId === item.foodId && isGoodOn(p, date));
     if (coveredAtHome) continue;
     const useBy = freshPurchaseUseBy(item.foodId, plan.startDate);
-    if (date > useBy) {
-      const name = getFood(item.foodId).name;
-      issues.push(
-        makeIssue(
-          "perishable_late",
-          `${describePlace({ date, slot: meal.slot })}: ${name} bought at the start of the week won't keep until then. ` +
-            `Move "${meal.name}" earlier, or freeze the ${name.toLowerCase()} on shopping day.`,
-          { mealId: meal.id, date, slot: meal.slot, foodId: item.foodId },
-        ),
-      );
-    }
+    if (date <= useBy) continue;
+
+    const food = getFood(item.foodId);
+    issues.push(
+      food.highRisk
+        ? makeIssue(
+            "high_risk_late",
+            `${where}: ${food.name} bought at the start of the week wouldn't be safe by then (good through ${useBy}). ` +
+              `Move "${meal.name}" earlier in the week.`,
+            { ...base, foodId: item.foodId },
+          )
+        : makeIssue(
+            "perishable_late",
+            `${where}: ${food.name} bought at the start of the week may not stay fresh until then. ` +
+              `Move "${meal.name}" earlier, or use frozen instead.`,
+            { ...base, foodId: item.foodId },
+          ),
+    );
   }
   return issues;
 }
@@ -238,4 +251,70 @@ export function enforcePlan(plan: WeekPlan, ctx: VerifyContext): EnforcedPlan {
       days: current.days.map((day) => ({ ...day, meals: day.meals.filter((meal) => !blocked.has(meal.id)) })),
     };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Checking one change against the whole plan
+// ---------------------------------------------------------------------------
+
+const issueKey = (issue: SafetyIssue) =>
+  [issue.code, issue.mealId, issue.date, issue.slot, issue.foodId, issue.tag].join("|");
+
+/** Blocking issues in `after` that weren't already in `before`. */
+export function newBlockingIssues(before: readonly SafetyIssue[], after: readonly SafetyIssue[]): SafetyIssue[] {
+  const existing = new Set(before.map(issueKey));
+  return after.filter((issue) => issue.severity === "block" && !existing.has(issueKey(issue)));
+}
+
+export interface PlanChangeCheck {
+  ok: boolean;
+  /** Blocking problems the change would introduce anywhere in the plan. */
+  blocking: SafetyIssue[];
+  /** New warnings the change would introduce (shown, not blocking). */
+  warnings: SafetyIssue[];
+  /** The plan with the change applied, verified. Only set when ok. */
+  plan?: Verified<WeekPlan>;
+}
+
+/**
+ * Would this change keep the plan safe? A single meal can look fine on its
+ * own and still break the plan: an egg meal can push a LATER egg meal over
+ * the weekly limit. So we verify the whole changed plan and compare.
+ */
+export function checkPlanChange(before: WeekPlan, after: WeekPlan, ctx: VerifyContext): PlanChangeCheck {
+  const beforeIssues = verifyPlan(before, ctx);
+  const afterIssues = verifyPlan(after, ctx);
+  const blocking = newBlockingIssues(beforeIssues, afterIssues);
+  const existingWarnings = new Set(beforeIssues.map(issueKey));
+  const warnings = afterIssues.filter((i) => i.severity === "warn" && !existingWarnings.has(issueKey(i)));
+  return blocking.length === 0
+    ? { ok: true, blocking, warnings, plan: after as Verified<WeekPlan> }
+    : { ok: false, blocking, warnings };
+}
+
+/** Put `meal` into the plan on `date`, replacing the meal with id `replacing` (or adding it). */
+export function withMeal(plan: WeekPlan, date: IsoDate, meal: Meal, replacing?: string): WeekPlan {
+  return {
+    ...plan,
+    days: plan.days.map((day) => {
+      if (day.date !== date) return { ...day, meals: day.meals.filter((m) => m.id !== replacing) };
+      const others = day.meals.filter((m) => m.id !== replacing);
+      return { ...day, meals: [...others, meal] };
+    }),
+  };
+}
+
+/**
+ * For regenerate / swap / "I'm lazy tonight": is this one suggested meal safe
+ * to put into the plan? Checks its allergens AND its effect on everything
+ * else (weekly limits, expiry, leftovers).
+ */
+export function verifyMealInPlan(
+  plan: WeekPlan,
+  date: IsoDate,
+  meal: Meal,
+  ctx: VerifyContext,
+  replacing?: string,
+): PlanChangeCheck {
+  return checkPlanChange(plan, withMeal(plan, date, meal, replacing), ctx);
 }

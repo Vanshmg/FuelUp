@@ -58,10 +58,32 @@ describe("verifyPlan", () => {
     expect(issues[0]).toMatchObject({ code: "expired", severity: "block" });
   });
 
-  it("warns when a fresh perishable is planned too late in the week", () => {
+  it("BLOCKS high-risk food planned after it would be unsafe (raw chicken on day 4)", () => {
     const plan = planFrom(FRI, [[], [], [], [meal("Chicken wrap", ["chicken_breast", "flour_tortilla"])]]);
     const issues = verifyPlan(plan, ctx());
-    expect(issues.map((i) => [i.code, i.severity, i.foodId])).toEqual([["perishable_late", "warn", "chicken_breast"]]);
+    expect(issues.map((i) => [i.code, i.severity, i.foodId])).toEqual([["high_risk_late", "block", "chicken_breast"]]);
+    expect(issues[0].message).toContain("Move \"Chicken wrap\" earlier");
+  });
+
+  it("allows the same chicken meal early in the week", () => {
+    const plan = planFrom(FRI, [[meal("Chicken wrap", ["chicken_breast", "flour_tortilla"])]]);
+    expect(verifyPlan(plan, ctx())).toEqual([]);
+  });
+
+  it("only WARNS for produce planned late (quality, not safety)", () => {
+    const plan = planFrom(FRI, [[], [], [], [], [], [meal("Spinach salad", ["spinach", "black_beans"])]]);
+    const issues = verifyPlan(plan, ctx());
+    expect(issues.map((i) => [i.code, i.severity, i.foodId])).toEqual([["perishable_late", "warn", "spinach"]]);
+  });
+
+  it("covers every high-risk category: poultry, meat, fish, eggs, dairy", () => {
+    for (const food of ["chicken_thigh", "ground_beef", "salmon", "cottage_cheese", "milk"] as const) {
+      const plan = planFrom(FRI, [[], [], [], [], [], [], [], [], [meal("Late meal", [food])]]);
+      expect(verifyPlan(plan, ctx()).map((i) => i.code), food).toContain("high_risk_late");
+    }
+    // Eggs keep 3 weeks, so they're only late after that.
+    const eggsLate = planFrom(FRI, [...Array(21).fill([]), [meal("Eggs", ["egg"])]]);
+    expect(verifyPlan(eggsLate, ctx()).map((i) => i.code)).toContain("high_risk_late");
   });
 
   it("enforces the 4-day leftover rule for batch meals", () => {

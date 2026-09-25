@@ -42,12 +42,12 @@ describe("expiresOn: the start day counts as day 1", () => {
   });
 
   it("opening shortens life: whichever comes first wins", () => {
-    // Greek yogurt: 14 days unopened, 5 once opened.
-    const opened = grocery({ foodId: "greek_yogurt", opened: true, openedOn: "2026-09-23" });
-    expect(expiresOn(opened)).toBe("2026-09-27");
-    // Opened on day 12: the unopened date (day 14) is still the limit.
-    const lateOpen = grocery({ foodId: "greek_yogurt", opened: true, openedOn: addDays(MON, 12) });
-    expect(expiresOn(lateOpen)).toBe(addDays(MON, 13));
+    // Cheddar: 180 days unopened, 21 once opened.
+    const opened = grocery({ foodId: "cheddar", opened: true, openedOn: "2026-09-23" });
+    expect(expiresOn(opened)).toBe(addDays("2026-09-23", 20));
+    // Opened near the end of its unopened life: the unopened date is still the limit.
+    const lateOpen = grocery({ foodId: "cheddar", opened: true, openedOn: addDays(MON, 170) });
+    expect(expiresOn(lateOpen)).toBe(addDays(MON, 179));
   });
 
   it("opened shelf-stable milk left in the pantry uses the (shorter) fridge value", () => {
@@ -70,11 +70,11 @@ describe("expiresOn: the start day counts as day 1", () => {
 
 describe("freshness states", () => {
   it("goes ok → soon → last day → expired", () => {
-    const yogurt = grocery({ foodId: "greek_yogurt" }); // good through Sep 4 (+13)
+    const yogurt = grocery({ foodId: "greek_yogurt" }); // 7 days: good through Sunday (+6)
     expect(freshness(yogurt, MON).state).toBe("ok");
-    expect(freshness(yogurt, addDays(MON, 11)).state).toBe("soon");
-    expect(freshness(yogurt, addDays(MON, 13))).toMatchObject({ state: "last_day", daysLeft: 0 });
-    expect(freshness(yogurt, addDays(MON, 14))).toMatchObject({ state: "expired", daysLeft: -1 });
+    expect(freshness(yogurt, addDays(MON, 4)).state).toBe("soon");
+    expect(freshness(yogurt, addDays(MON, 6))).toMatchObject({ state: "last_day", daysLeft: 0 });
+    expect(freshness(yogurt, addDays(MON, 7))).toMatchObject({ state: "expired", daysLeft: -1 });
   });
 
   it("usablePantry drops anything past its date", () => {

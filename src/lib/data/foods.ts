@@ -11,8 +11,26 @@
  * - `mayContain`: common in some brands or cross-contact. Hard avoids treat
  *   this as a FAIL (safety first); weekly limits don't count it.
  * - `shelfLife`: days, by storage, for a typical unopened item; `opened` for
- *   items where opening changes it. Conservative ends of typical ranges.
- *   These are estimates: "Check the label, look, and smell."
+ *   items where opening changes it. These are estimates: "Check the label,
+ *   look, and smell."
+ *
+ *   How the numbers map to USDA ranges: the day you buy or cook something
+ *   counts as day 1, so N days means "good through N - 1 days after".
+ *   We pick N so the last good day is the LOW end of the USDA range.
+ *   e.g. raw chicken "1–2 days" → N = 2 → bought Monday, good through Tuesday.
+ *
+ *   Sources for HIGH-RISK foods (meat, poultry, fish, eggs, dairy):
+ *   - FDA/USDA "Refrigerator & Freezer Storage Chart" (March 2018),
+ *     https://www.fda.gov/media/74435/download — meat, poultry, fish, eggs,
+ *     deli, frozen entrees, leftovers.
+ *   - USDA FSIS "How long can you keep dairy products like yogurt, milk, and
+ *     cheese in the refrigerator?" (FoodKeeper data),
+ *     https://ask.fsis.usda.gov/article/How-long-can-you-keep-dairy-products-like-yogurt-milk-and-cheese-in-the-refrigerator
+ *     — milk 7 days, yogurt 1–2 weeks, soft cheese 1 week, hard cheese
+ *     6 months unopened / 3–4 weeks opened.
+ *   Freezer times are for quality (0°F keeps food safe indefinitely).
+ *   Items with no USDA row (paneer, tzatziki, string cheese) use the closest
+ *   category (soft cheese / yogurt).
  * - `nutrition`: per `serving`, rough estimates for pattern insights.
  * - `price`: typical US grocery package price in USD, and how many servings
  *   a package gives. Per-serving cost = cost / servings (computed by code).
@@ -46,6 +64,14 @@ export interface FoodDef {
   mayContain?: AvoidTag[];
   /** Where it usually goes when you get home. */
   storage: StorageLocation;
+  /**
+   * Raw meat, poultry, fish, eggs, and dairy: foods where going past the date
+   * is a food-safety risk, not just a quality issue. Planning one after its
+   * use-by date BLOCKS the meal (produce only warns).
+   */
+  highRisk?: true;
+  /** Short, friendly storage advice shown when a high-risk item is marked bought. */
+  storageTip?: string;
   shelfLife: ShelfLife;
   serving: string;
   nutrition: Nutrition;
@@ -65,66 +91,88 @@ export const FOODS = {
     name: "Chicken breast", emoji: "🍗", role: "protein", aisle: "meat_seafood",
     aliases: ["chicken breast", "chicken breasts"],
     contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 2, freezer: 270 },
+    highRisk: true,
+    storageTip: "Bottom shelf, sealed, so juices can't drip. Cook within 1–2 days or freeze. Thaw in the fridge, never on the counter.",
     serving: "4 oz", nutrition: n(140, 26, 0, 3), price: { package: "1.5 lb pack", cost: 7.49, servings: 6 },
   },
   chicken_thigh: {
     name: "Chicken thighs", emoji: "🍗", role: "protein", aisle: "meat_seafood",
     aliases: ["chicken thigh", "chicken thighs", "chicken"],
     contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 2, freezer: 270 },
+    highRisk: true,
+    storageTip: "Bottom shelf, sealed, so juices can't drip. Cook within 1–2 days or freeze. Thaw in the fridge, never on the counter.",
     serving: "4 oz", nutrition: n(180, 22, 0, 10), price: { package: "1.5 lb pack", cost: 5.99, servings: 6 },
   },
   rotisserie_chicken: {
     name: "Rotisserie chicken", emoji: "🍗", role: "protein", aisle: "deli_ready",
     aliases: ["rotisserie chicken", "roast chicken"],
-    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 3, freezer: 90 },
+    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 4, freezer: 120 },
+    highRisk: true,
+    storageTip: "Fridge within 2 hours of buying. Eat within 3–4 days, or pull the meat off the bone and freeze it.",
     serving: "3 oz meat", nutrition: n(170, 23, 0, 8), price: { package: "whole chicken", cost: 7.99, servings: 5 },
   },
   ground_turkey: {
     name: "Ground turkey", emoji: "🦃", role: "protein", aisle: "meat_seafood",
     aliases: ["ground turkey", "turkey mince"],
-    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 2, freezer: 120 },
+    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 2, freezer: 90 },
+    highRisk: true,
+    storageTip: "Bottom shelf, sealed. Cook within 1–2 days or freeze. Cook until no pink remains (165°F).",
     serving: "4 oz", nutrition: n(170, 22, 0, 9), price: { package: "1 lb", cost: 5.49, servings: 4 },
   },
   ground_beef: {
     name: "Ground beef", emoji: "🥩", role: "protein", aisle: "meat_seafood",
     aliases: ["ground beef", "beef mince", "hamburger meat"],
-    contains: ["beef"], storage: "fridge", shelfLife: { fridge: 2, freezer: 120 },
+    contains: ["beef"], storage: "fridge", shelfLife: { fridge: 2, freezer: 90 },
+    highRisk: true,
+    storageTip: "Bottom shelf, sealed. Cook within 1–2 days or freeze. Cook to 160°F.",
     serving: "4 oz", nutrition: n(290, 19, 0, 23), price: { package: "1 lb", cost: 5.99, servings: 4 },
   },
   beef_sliced: {
     name: "Thin-sliced beef", emoji: "🥩", role: "protein", aisle: "meat_seafood",
     aliases: ["sliced beef", "thin sliced beef", "bulgogi beef", "shaved steak"],
-    contains: ["beef"], storage: "fridge", shelfLife: { fridge: 3, freezer: 180 },
+    contains: ["beef"], storage: "fridge", shelfLife: { fridge: 4, freezer: 180 },
+    highRisk: true,
+    storageTip: "Bottom shelf, sealed. Cook within 3 days or freeze flat in a bag so it thaws fast.",
     serving: "4 oz", nutrition: n(220, 22, 0, 14), price: { package: "1 lb", cost: 8.99, servings: 4 },
   },
   bacon: {
     name: "Bacon", emoji: "🥓", role: "protein", aisle: "meat_seafood",
     aliases: ["bacon"],
     contains: ["pork"], storage: "fridge", shelfLife: { fridge: 7, freezer: 30, opened: { fridge: 7 } },
+    highRisk: true,
+    storageTip: "Keep sealed in the fridge and use within a week of opening. Freezes well for a month.",
     serving: "2 slices", nutrition: n(90, 6, 0, 7), price: { package: "12 oz pack", cost: 5.99, servings: 8 },
   },
   deli_turkey: {
     name: "Deli turkey", emoji: "🦃", role: "protein", aisle: "deli_ready",
     aliases: ["deli turkey", "turkey slices", "sliced turkey", "turkey"],
-    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 14, freezer: 60, opened: { fridge: 3 } },
+    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 14, freezer: 30, opened: { fridge: 4 } },
+    highRisk: true,
+    storageTip: "Once opened, eat within 3–5 days. Keep it sealed and cold.",
     serving: "2 oz", nutrition: n(60, 10, 2, 1), price: { package: "8 oz pack", cost: 4.99, servings: 4 },
   },
   salmon: {
     name: "Salmon fillet", emoji: "🐟", role: "protein", aisle: "meat_seafood",
     aliases: ["salmon", "salmon fillet"],
-    contains: ["fish"], storage: "fridge", shelfLife: { fridge: 2, freezer: 90 },
+    contains: ["fish"], storage: "fridge", shelfLife: { fridge: 2, freezer: 60 },
+    highRisk: true,
+    storageTip: "Coldest spot in the fridge, sealed, bottom shelf. Cook within 1–2 days or freeze.",
     serving: "4 oz", nutrition: n(230, 23, 0, 14), price: { package: "2 fillets", cost: 9.99, servings: 2 },
   },
   canned_tuna: {
     name: "Canned tuna", emoji: "🐟", role: "protein", aisle: "pantry",
     aliases: ["tuna", "canned tuna", "tuna can"],
-    contains: ["fish"], storage: "pantry", shelfLife: { pantry: 730, opened: { fridge: 3 } },
+    contains: ["fish"], storage: "pantry", shelfLife: { pantry: 730, opened: { fridge: 4 } },
+    highRisk: true,
+    storageTip: "Once opened, move leftovers out of the can into a covered container in the fridge. Use within 3–4 days.",
     serving: "1 can", nutrition: n(120, 26, 0, 1), price: { package: "5 oz can", cost: 1.49, servings: 1 },
   },
   shrimp: {
     name: "Frozen shrimp", emoji: "🍤", role: "protein", aisle: "frozen",
     aliases: ["shrimp", "prawns", "frozen shrimp"],
-    contains: ["shellfish"], storage: "freezer", shelfLife: { freezer: 180, fridge: 2 },
+    contains: ["shellfish"], storage: "freezer", shelfLife: { freezer: 90, fridge: 2 },
+    highRisk: true,
+    storageTip: "Keep frozen. Thaw overnight in the fridge (or sealed, under cold water) and cook within 1–2 days.",
     serving: "4 oz", nutrition: n(110, 23, 1, 1), price: { package: "1 lb bag", cost: 8.99, servings: 4 },
   },
 
@@ -136,6 +184,8 @@ export const FOODS = {
       "boiled eggs", "hard boiled egg", "omelette", "omelet", "egg bhurji", "anda",
     ],
     contains: ["egg"], storage: "fridge", shelfLife: { fridge: 21 },
+    highRisk: true,
+    storageTip: "Keep in the carton on a shelf, not the door (it's warmer). Cook until yolks are firm.",
     serving: "2 eggs", nutrition: n(140, 12, 1, 10), price: { package: "dozen", cost: 3.99, servings: 6 },
   },
   tofu: {
@@ -153,7 +203,9 @@ export const FOODS = {
   paneer: {
     name: "Paneer", emoji: "🧀", role: "protein", aisle: "dairy_eggs",
     aliases: ["paneer"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 10, freezer: 90, opened: { fridge: 3 } },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 7, freezer: 90, opened: { fridge: 3 } },
+    highRisk: true,
+    storageTip: "Keep sealed and cold. Once opened, store airtight and use within 3 days, or freeze.",
     serving: "2 oz", nutrition: n(180, 11, 2, 14), price: { package: "14 oz block", cost: 5.99, servings: 7 },
   },
   edamame: {
@@ -203,13 +255,17 @@ export const FOODS = {
   greek_yogurt: {
     name: "Greek yogurt", emoji: "🥛", role: "dairy", aisle: "dairy_eggs",
     aliases: ["greek yogurt", "greek yoghurt"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 14, opened: { fridge: 5 } },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 7, opened: { fridge: 5 } },
+    highRisk: true,
+    storageTip: "Keep cold and sealed; don't leave it out more than 2 hours. Use a clean spoon.",
     serving: "3/4 cup", nutrition: n(100, 17, 6, 0), price: { package: "32 oz tub", cost: 5.49, servings: 5 },
   },
   plain_yogurt: {
     name: "Plain yogurt (dahi)", emoji: "🥛", role: "dairy", aisle: "dairy_eggs",
     aliases: ["yogurt", "yoghurt", "dahi", "curd", "plain yogurt", "raita"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 14, opened: { fridge: 5 } },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 7, opened: { fridge: 5 } },
+    highRisk: true,
+    storageTip: "Keep cold and sealed; don't leave it out more than 2 hours. Use a clean spoon.",
     serving: "3/4 cup", nutrition: n(110, 6, 9, 6), price: { package: "32 oz tub", cost: 3.99, servings: 5 },
   },
   soy_yogurt: {
@@ -222,6 +278,8 @@ export const FOODS = {
     name: "Milk", emoji: "🥛", role: "dairy", aisle: "dairy_eggs",
     aliases: ["milk", "whole milk", "2% milk", "doodh"],
     contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 7, opened: { fridge: 5 } },
+    highRisk: true,
+    storageTip: "Back of the fridge, not the door. Don't leave it out; use within about a week.",
     serving: "1 cup", nutrition: n(150, 8, 12, 8), price: { package: "1 gallon", cost: 3.79, servings: 16 },
   },
   soy_milk: {
@@ -239,37 +297,49 @@ export const FOODS = {
   cheddar: {
     name: "Cheddar cheese", emoji: "🧀", role: "dairy", aisle: "dairy_eggs",
     aliases: ["cheddar", "cheddar cheese", "cheese"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 60, freezer: 180, opened: { fridge: 21 } },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 180, freezer: 180, opened: { fridge: 21 } },
+    highRisk: true,
+    storageTip: "Rewrap tightly after opening. Small mold spot on hard cheese: cut 1 inch around it.",
     serving: "1 oz", nutrition: n(115, 7, 0, 9), price: { package: "8 oz block", cost: 3.99, servings: 8 },
   },
   mozzarella: {
     name: "Shredded mozzarella", emoji: "🧀", role: "dairy", aisle: "dairy_eggs",
     aliases: ["mozzarella", "shredded mozzarella", "shredded cheese"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 30, freezer: 180, opened: { fridge: 7 } },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 7, freezer: 180, opened: { fridge: 5 } },
+    highRisk: true,
+    storageTip: "Soft cheese: keep sealed and cold, use within a week. Toss it if you see mold. Check the package date.",
     serving: "1 oz", nutrition: n(85, 6, 1, 6), price: { package: "8 oz bag", cost: 3.49, servings: 8 },
   },
   feta: {
     name: "Feta", emoji: "🧀", role: "dairy", aisle: "dairy_eggs",
     aliases: ["feta", "feta cheese"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 30, opened: { fridge: 5 } },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 7, opened: { fridge: 5 } },
+    highRisk: true,
+    storageTip: "Keep it in its brine, sealed. Soft cheese: toss it if you see mold.",
     serving: "1 oz", nutrition: n(75, 4, 1, 6), price: { package: "6 oz tub", cost: 4.49, servings: 6 },
   },
   cottage_cheese: {
     name: "Cottage cheese", emoji: "🧀", role: "dairy", aisle: "dairy_eggs",
     aliases: ["cottage cheese"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 10, opened: { fridge: 5 } },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 7, opened: { fridge: 5 } },
+    highRisk: true,
+    storageTip: "Keep cold and sealed. Soft cheese: toss it if it smells sour or shows mold.",
     serving: "1/2 cup", nutrition: n(110, 12, 5, 5), price: { package: "16 oz tub", cost: 3.49, servings: 4 },
   },
   string_cheese: {
     name: "String cheese", emoji: "🧀", role: "snack", aisle: "dairy_eggs",
     aliases: ["string cheese", "cheese stick", "cheese sticks"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 30 },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 7 },
+    highRisk: true,
+    storageTip: "Keep in the fridge until you eat it. Check the package date.",
     serving: "1 stick", nutrition: n(80, 7, 1, 6), price: { package: "12 sticks", cost: 4.99, servings: 12 },
   },
   butter: {
     name: "Butter", emoji: "🧈", role: "fat_oil", aisle: "dairy_eggs",
     aliases: ["butter"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 60, freezer: 270 },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 30, freezer: 180 },
+    highRisk: true,
+    storageTip: "Keep it covered in the fridge. Freeze extra sticks for months.",
     serving: "1 tbsp", nutrition: n(100, 0, 0, 11), price: { package: "1 lb", cost: 4.99, servings: 32 },
   },
   ghee: {
@@ -736,7 +806,9 @@ export const FOODS = {
     name: "Frozen pork dumplings (mandu)", emoji: "🥟", role: "ready_made", aisle: "frozen",
     aliases: ["dumplings", "pork dumplings", "mandu", "potstickers", "gyoza"],
     contains: ["wheat", "soy", "pork", "sesame"], mayContain: ["egg", "shellfish"],
-    storage: "freezer", shelfLife: { freezer: 180 },
+    storage: "freezer", shelfLife: { freezer: 90 },
+    highRisk: true,
+    storageTip: "Keep frozen and cook straight from frozen until steaming hot all the way through.",
     serving: "6 dumplings", nutrition: n(290, 12, 33, 12), price: { package: "1.5 lb bag", cost: 7.99, servings: 4 },
   },
   frozen_veggie_dumplings: {
@@ -785,7 +857,9 @@ export const FOODS = {
     aliases: ["caesar salad", "caesar salad kit", "salad kit"],
     // Caesar dressing: egg yolk, parmesan, anchovy; croutons: wheat.
     contains: ["egg", "dairy", "fish", "wheat"], storage: "fridge",
-    shelfLife: { fridge: 5, opened: { fridge: 2 } },
+    shelfLife: { fridge: 4, opened: { fridge: 2 } },
+    highRisk: true,
+    storageTip: "Dressing has egg and dairy: keep cold, and eat within a day or two of opening.",
     serving: "1/3 kit", nutrition: n(150, 3, 8, 12), price: { package: "10 oz kit", cost: 4.49, servings: 3 },
   },
   veggie_burger: {
@@ -898,7 +972,9 @@ export const FOODS = {
   tzatziki: {
     name: "Tzatziki", role: "sauce", aisle: "deli_ready",
     aliases: ["tzatziki"],
-    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 10, opened: { fridge: 5 } },
+    contains: ["dairy"], storage: "fridge", shelfLife: { fridge: 7, opened: { fridge: 5 } },
+    highRisk: true,
+    storageTip: "Yogurt-based: keep cold, don't leave it out more than 2 hours.",
     serving: "2 tbsp", nutrition: n(30, 1, 2, 2), price: { package: "8 oz tub", cost: 3.99, servings: 8 },
   },
   thai_curry_paste: {

@@ -44,3 +44,9 @@ export function shortDayName(iso: IsoDate): string {
 export function minDate(a: IsoDate, b: IsoDate): IsoDate {
   return a < b ? a : b;
 }
+
+/** The most recent `weekday` on or before `today` (e.g. last Sunday = shopping day). */
+export function lastWeekdayOnOrBefore(today: IsoDate, weekday: Weekday): IsoDate {
+  const back = (WEEKDAYS.indexOf(weekdayOf(today)) - WEEKDAYS.indexOf(weekday) + 7) % 7;
+  return addDays(today, -back);
+}

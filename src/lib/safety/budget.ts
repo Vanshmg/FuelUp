@@ -14,11 +14,12 @@ import { isGoodOn } from "./expiry";
 export const toCents = (usd: number): number => Math.round(usd * 100);
 export const fromCents = (cents: number): number => cents / 100;
 
-/** "$12.50" */
+/** "$12.50", or "$12" for whole dollars. */
 export function formatUsd(usd: number): string {
   const cents = toCents(usd);
   const sign = cents < 0 ? "-" : "";
-  return `${sign}$${(Math.abs(cents) / 100).toFixed(2)}`;
+  const abs = Math.abs(cents);
+  return `${sign}$${abs % 100 === 0 ? abs / 100 : (abs / 100).toFixed(2)}`;
 }
 
 export function perServingCostCents(foodId: FoodId): number {

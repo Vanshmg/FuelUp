@@ -22,13 +22,14 @@ export type IssueCode =
   | "leftover_too_old" // leftovers past the 4-day rule
   | "leftover_unknown" // leftovers we can't trace to a cook date
   | "not_enough_leftovers" // more leftover meals than portions cooked
-  | "perishable_late" // bought on shopping day but eaten after it would go bad
+  | "high_risk_late" // raw meat/poultry/fish, eggs, dairy eaten after they'd be unsafe
+  | "perishable_late" // produce etc. bought on shopping day, eaten after it would go bad
   | "too_many_new" // more than one new dish this week
   | "over_budget"; // plan's estimated grocery cost is over the weekly budget
 
 export type Severity = "block" | "warn";
 
-const SEVERITY: Record<IssueCode, Severity> = {
+const SEVERITY = {
   hard_avoid: "block",
   may_contain: "block",
   avoid_food: "block",
@@ -38,11 +39,19 @@ const SEVERITY: Record<IssueCode, Severity> = {
   expired: "block",
   leftover_too_old: "block",
   leftover_unknown: "block",
+  high_risk_late: "block", // food-safety risk: the plan must move the meal earlier
   not_enough_leftovers: "warn",
-  perishable_late: "warn",
+  perishable_late: "warn", // quality, not safety: produce going limp
   too_many_new: "warn",
   over_budget: "warn",
-};
+} as const satisfies Record<IssueCode, Severity>;
+
+/** Codes that remove a meal. */
+export type BlockCode = { [C in IssueCode]: (typeof SEVERITY)[C] extends "block" ? C : never }[IssueCode];
+
+export function severityOf(code: IssueCode): Severity {
+  return SEVERITY[code];
+}
 
 export interface SafetyIssue {
   code: IssueCode;
@@ -55,10 +64,17 @@ export interface SafetyIssue {
   tag?: AvoidTag;
 }
 
-export function makeIssue(
-  code: IssueCode,
+type IssueDetails = Omit<SafetyIssue, "code" | "severity" | "message">;
+
+/**
+ * Create an issue. A BLOCKING issue must say which meal it blocks (mealId):
+ * enforcePlan removes meals by id, so a blocking issue without one would
+ * silently remove nothing. TypeScript enforces this at compile time.
+ */
+export function makeIssue<C extends IssueCode>(
+  code: C,
   message: string,
-  details: Omit<SafetyIssue, "code" | "severity" | "message"> = {},
+  ...[details]: C extends BlockCode ? [IssueDetails & { mealId: string }] : [IssueDetails?]
 ): SafetyIssue {
   return { code, severity: SEVERITY[code], message, ...details };
 }

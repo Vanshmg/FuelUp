@@ -2,18 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { Splash } from "@/components/shell/AppShell";
 import { useAppState, useHydrated } from "@/hooks/useAppState";
 
-/** "/" sends you to your plan, or to onboarding if you're new. */
-export default function Home() {
+export default function OnboardingPage() {
   const hydrated = useHydrated();
   const { profile } = useAppState();
   const router = useRouter();
 
+  // Already set up? Go to the plan. ("Start over" in the menu clears the profile first.)
   useEffect(() => {
-    if (hydrated) router.replace(profile ? "/today" : "/onboarding");
+    if (hydrated && profile) router.replace("/today");
   }, [hydrated, profile, router]);
 
-  return <Splash />;
+  if (!hydrated || profile) return <Splash />;
+  return <OnboardingFlow />;
 }

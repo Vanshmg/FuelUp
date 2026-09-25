@@ -132,3 +132,44 @@ describe("lookupFood near-misses: a longer name never matches a shorter food", (
     expect(lookupFood(text)).toBe(expected);
   });
 });
+
+describe("high-risk foods (raw meat, poultry, fish, eggs, dairy)", () => {
+  const RISKY_TAGS = ["poultry", "beef", "pork", "lamb", "fish", "shellfish", "egg", "dairy"];
+
+  it("flags every perishable protein or dairy food made from them", () => {
+    for (const [id, food] of FOOD_LIST) {
+      const risky = food.contains.some((tag) => RISKY_TAGS.includes(tag));
+      const perishable = food.storage !== "pantry";
+      if ((food.role === "protein" || food.role === "dairy") && risky && perishable) {
+        expect(food.highRisk, `${id} should be highRisk`).toBe(true);
+      }
+    }
+  });
+
+  it("gives every high-risk food a storage tip", () => {
+    for (const [id, food] of FOOD_LIST) {
+      if (food.highRisk) expect(food.storageTip?.length, id).toBeGreaterThan(20);
+    }
+  });
+
+  it("matches the low end of USDA ranges (start day = day 1)", () => {
+    // FDA/USDA chart: fresh poultry & ground meat 1–2 days, eggs 3–5 weeks,
+    // cooked poultry 3–4 days, lunch meat opened 3–5 days; FSIS: milk 7 days,
+    // yogurt 1–2 weeks, soft cheese 1 week, hard cheese opened 3–4 weeks.
+    expect(FOODS.chicken_thigh.shelfLife.fridge).toBe(2);
+    expect(FOODS.ground_beef.shelfLife.fridge).toBe(2);
+    expect(FOODS.salmon.shelfLife.fridge).toBe(2);
+    expect(FOODS.egg.shelfLife.fridge).toBe(21);
+    expect(FOODS.rotisserie_chicken.shelfLife.fridge).toBe(4);
+    expect(FOODS.deli_turkey.shelfLife.opened.fridge).toBe(4);
+    expect(FOODS.milk.shelfLife.fridge).toBe(7);
+    expect(FOODS.greek_yogurt.shelfLife.fridge).toBe(7);
+    expect(FOODS.cottage_cheese.shelfLife.fridge).toBe(7);
+    expect(FOODS.cheddar.shelfLife.opened.fridge).toBe(21);
+  });
+
+  it("doesn't flag produce", () => {
+    expect(getFood("spinach").highRisk).toBeUndefined();
+    expect(getFood("berries").highRisk).toBeUndefined();
+  });
+});

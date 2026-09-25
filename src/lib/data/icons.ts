@@ -18,3 +18,8 @@ export const ROLE_ICONS: Record<FoodRole, string> = {
   fat_oil: "🫒",
   spice: "🧂",
 };
+
+/** The emoji for a food, falling back to its role's icon. */
+export function foodEmoji(food: { emoji?: string; role: FoodRole }): string {
+  return food.emoji ?? ROLE_ICONS[food.role];
+}

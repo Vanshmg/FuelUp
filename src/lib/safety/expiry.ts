@@ -11,7 +11,11 @@ import { addDays, daysBetween, minDate } from "@/lib/dates";
 import { getFood, type FoodDef } from "@/lib/data/foods";
 import type { FoodId, IsoDate, PantryItem, StorageLocation } from "@/lib/types";
 
-/** Cooked leftovers. Room temperature: 0 days (the 2-hour rule). */
+/**
+ * Cooked leftovers: 3–4 days in the fridge, 2–3 months frozen
+ * (FDA/USDA Refrigerator & Freezer Storage Chart, "Meat leftovers").
+ * Room temperature: 0 days (the 2-hour rule).
+ */
 export const LEFTOVER_SHELF_LIFE: Record<StorageLocation, number> = { fridge: 4, freezer: 60, pantry: 0 };
 
 const COLDNESS: Record<StorageLocation, number> = { pantry: 0, fridge: 1, freezer: 2 };

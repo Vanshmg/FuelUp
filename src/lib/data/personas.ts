@@ -145,7 +145,7 @@ const jae: Persona = {
       plan: null,
       groceryList: [],
       pantry: [
-        bought("rotisserie_chicken", 1, today, "fridge"), // use by tomorrow → heads-up
+        bought("rotisserie_chicken", 2, today, "fridge"), // cooked chicken, 3–4 days: good through tomorrow → heads-up
         bought("bagged_salad", 2, today, "fridge"), // use by tomorrow → heads-up
         bought("greek_yogurt", 4, today, "fridge"),
         bought("kimchi", 20, today, "fridge", 10),

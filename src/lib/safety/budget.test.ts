@@ -14,6 +14,7 @@ describe("money math in cents", () => {
   it("formats dollars", () => {
     expect(formatUsd(12.5)).toBe("$12.50");
     expect(formatUsd(-3.2)).toBe("-$3.20");
+    expect(formatUsd(45)).toBe("$45");
   });
 
   it("reports what's left and whether you're over", () => {
