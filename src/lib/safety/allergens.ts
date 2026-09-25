@@ -11,13 +11,17 @@
 import { ALLERGEN_SYNONYMS, SAFE_PHRASES } from "@/lib/data/allergenSynonyms";
 import { DIET_AVOIDS } from "@/lib/data/diets";
 import { getFood } from "@/lib/data/foods";
+import { expandTags } from "@/lib/data/tagGroups";
 import { AVOID_TAGS, type AvoidTag, type FoodId, type IsoDate, type Meal, type Profile } from "@/lib/types";
 import { shortDayName } from "@/lib/dates";
 import { makeIssue, TAG_LABELS, type SafetyIssue } from "./issues";
 
-/** Hard avoids from the profile plus everything the diet implies. */
+/**
+ * Hard avoids from the profile plus everything the diet implies, with group
+ * tags expanded ("poultry" → chicken, turkey, duck).
+ */
 export function effectiveAvoidTags(profile: Pick<Profile, "avoidTags" | "diet">): AvoidTag[] {
-  return [...new Set([...profile.avoidTags, ...DIET_AVOIDS[profile.diet]])];
+  return expandTags([...profile.avoidTags, ...DIET_AVOIDS[profile.diet]]);
 }
 
 // ---------------------------------------------------------------------------
@@ -33,6 +37,8 @@ const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"
 const TAG_PATTERNS = Object.fromEntries(
   AVOID_TAGS.map((tag) => {
     const words = ALLERGEN_SYNONYMS[tag].map(escapeRegex).join("|");
+    // A group tag has no words of its own; this pattern never matches.
+    if (!words) return [tag, /(?!)/];
     return [tag, new RegExp(`(?<![a-z0-9])(?:${words})(?:e?s)?(?![a-z0-9])`, "i")];
   }),
 ) as Record<AvoidTag, RegExp>;
@@ -50,10 +56,10 @@ function stripSafePhrases(text: string, tag: AvoidTag): string {
   return cleaned;
 }
 
-/** Which of `tags` does this text mention? */
+/** Which of `tags` does this text mention? Group tags are checked via their members. */
 export function tagsInText(text: string, tags: readonly AvoidTag[] = AVOID_TAGS): AvoidTag[] {
   const lower = text.toLowerCase();
-  return tags.filter((tag) => TAG_PATTERNS[tag].test(stripSafePhrases(lower, tag)));
+  return expandTags(tags).filter((tag) => TAG_PATTERNS[tag].test(stripSafePhrases(lower, tag)));
 }
 
 // ---------------------------------------------------------------------------
@@ -66,8 +72,9 @@ export interface FoodConflict {
 }
 
 /** Why a single catalog food is unsafe for these avoid tags (empty = fine). */
-export function foodConflicts(foodId: FoodId, avoidTags: readonly AvoidTag[]): FoodConflict[] {
+export function foodConflicts(foodId: FoodId, rawAvoidTags: readonly AvoidTag[]): FoodConflict[] {
   const food = getFood(foodId);
+  const avoidTags = expandTags(rawAvoidTags);
   const conflicts: FoodConflict[] = [];
   for (const tag of food.contains) if (avoidTags.includes(tag)) conflicts.push({ tag, kind: "contains" });
   for (const tag of food.mayContain ?? []) {

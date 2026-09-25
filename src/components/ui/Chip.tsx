@@ -26,8 +26,8 @@ export function Chip({
       className={cn(
         "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors",
         selected
-          ? "border-tomato bg-tomato-soft text-ink"
-          : "border-line bg-card text-ink hover:border-tomato/50 hover:bg-cream-deep",
+          ? "border-orange bg-orange-soft text-ink"
+          : "border-line bg-card text-ink hover:border-orange/50 hover:bg-cream-deep",
         locked && "cursor-default opacity-70",
       )}
     >
@@ -38,7 +38,7 @@ export function Chip({
       )}
       {label}
       {selected && (
-        <span aria-hidden className="text-tomato-deep">
+        <span aria-hidden className="text-orange-deep">
           ✓
         </span>
       )}

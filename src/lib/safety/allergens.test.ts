@@ -37,7 +37,7 @@ describe("tagsInText (second layer: scanning meal names)", () => {
 describe("effectiveAvoidTags", () => {
   it("adds everything the diet implies", () => {
     expect(effectiveAvoidTags({ diet: "vegetarian", avoidTags: ["dairy"] }).sort()).toEqual(
-      ["beef", "dairy", "fish", "lamb", "pork", "poultry", "shellfish"].sort(),
+      ["beef", "chicken", "dairy", "duck", "fish", "lamb", "pork", "shellfish", "turkey"].sort(),
     );
     expect(effectiveAvoidTags({ diet: "none", avoidTags: ["peanut"] })).toEqual(["peanut"]);
   });
@@ -54,7 +54,7 @@ describe("checkMealAllergens", () => {
     const avoid = effectiveAvoidTags({ diet: "vegetarian", avoidTags: ["dairy"] });
     const issues = checkMealAllergens(meal("Chicken tikka with naan", ["chicken_thigh", "naan"]), avoid, []);
     expect(issues.map((i) => [i.code, i.tag])).toEqual([
-      ["hard_avoid", "poultry"],
+      ["hard_avoid", "chicken"],
       ["hard_avoid", "dairy"],
     ]);
   });

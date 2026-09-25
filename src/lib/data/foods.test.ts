@@ -90,6 +90,7 @@ describe("lookupFood (the 'scrambled eggs' example)", () => {
 describe("allergen synonyms", () => {
   it("has a lowercase word list for every tag", () => {
     for (const tag of AVOID_TAGS) {
+      if (tag === "poultry") continue; // a group tag: its members carry the words
       expect(ALLERGEN_SYNONYMS[tag].length, tag).toBeGreaterThan(0);
       for (const word of ALLERGEN_SYNONYMS[tag]) expect(word).toBe(word.toLowerCase());
     }
@@ -134,7 +135,7 @@ describe("lookupFood near-misses: a longer name never matches a shorter food", (
 });
 
 describe("high-risk foods (raw meat, poultry, fish, eggs, dairy)", () => {
-  const RISKY_TAGS = ["poultry", "beef", "pork", "lamb", "fish", "shellfish", "egg", "dairy"];
+  const RISKY_TAGS = ["chicken", "turkey", "duck", "beef", "pork", "lamb", "fish", "shellfish", "egg", "dairy"];
 
   it("flags every perishable protein or dairy food made from them", () => {
     for (const [id, food] of FOOD_LIST) {

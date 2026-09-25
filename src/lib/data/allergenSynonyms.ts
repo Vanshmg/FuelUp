@@ -46,7 +46,12 @@ export const ALLERGEN_SYNONYMS: Record<AvoidTag, string[]> = {
   ],
   sesame: ["sesame", "tahini", "hummus", "za'atar", "zaatar", "gomasio", "halva"],
   chocolate: ["chocolate", "cocoa", "cacao", "mocha", "brownie", "brownies", "fudge", "nutella"],
-  poultry: ["chicken", "turkey", "duck", "murgh"],
+  // "poultry" is a group tag: checks expand it to chicken + turkey + duck,
+  // so it needs no words of its own. "Poultry" in a name counts for all three.
+  poultry: [],
+  chicken: ["chicken", "murgh", "poultry"],
+  turkey: ["turkey", "poultry"],
+  duck: ["duck", "poultry"],
   beef: ["beef", "steak", "bulgogi", "brisket", "carne asada", "barbacoa", "galbi", "pho bo"],
   pork: ["pork", "bacon", "ham", "chorizo", "carnitas", "prosciutto", "pepperoni", "salami", "char siu"],
   lamb: ["lamb", "mutton", "gyro", "keema"],
@@ -66,4 +71,8 @@ export const SAFE_PHRASES: Partial<Record<AvoidTag, string[]>> = {
   ],
   egg: ["egg-free", "egg free", "eggless", "vegan mayo"],
   wheat: ["rice noodles", "rice noodle", "glass noodles", "corn tortilla", "gluten-free", "gluten free"],
+  // Poultry seasoning is herbs (sage, thyme), not poultry.
+  chicken: ["poultry seasoning"],
+  turkey: ["poultry seasoning"],
+  duck: ["poultry seasoning"],
 };

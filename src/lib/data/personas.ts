@@ -192,8 +192,8 @@ const arjun: Persona = {
         effort: "minimal_cook",
         cuisines: ["indian"],
         diet: "none",
-        // "Mostly veg plus chicken": no beef or pork. Change in onboarding if needed.
-        avoidTags: ["beef", "pork"],
+        // "Mostly veg plus chicken": no beef, pork, turkey, or duck.
+        avoidTags: ["beef", "pork", "turkey", "duck"],
         avoidFoods: [],
         weeklyLimits: [
           { tag: "egg", maxPerWeek: 4 },

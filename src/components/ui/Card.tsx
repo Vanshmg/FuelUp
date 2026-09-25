@@ -12,7 +12,7 @@ export function EmptyState({ emoji, title, children }: { emoji: string; title: s
       <span className="mb-1 text-5xl" aria-hidden>
         {emoji}
       </span>
-      <h2 className="font-display text-xl font-semibold">{title}</h2>
+      <h2 className="font-display text-xl font-extrabold">{title}</h2>
       {children && <div className="max-w-xs text-sm leading-relaxed text-ink-soft">{children}</div>}
     </Card>
   );

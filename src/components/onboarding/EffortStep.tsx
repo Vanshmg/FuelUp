@@ -17,7 +17,7 @@ export function EffortStep({ value, onChange }: { value: EffortLevel | null; onC
             onClick={() => onChange(level)}
             className={cn(
               "flex items-center gap-4 rounded-card border-2 p-4 text-left shadow-soft transition-colors",
-              selected ? "border-tomato bg-tomato-soft" : "border-transparent bg-card hover:border-line",
+              selected ? "border-orange bg-orange-soft" : "border-transparent bg-card hover:border-line",
             )}
           >
             <span
@@ -30,7 +30,7 @@ export function EffortStep({ value, onChange }: { value: EffortLevel | null; onC
               {option.emoji}
             </span>
             <span className="flex flex-col gap-0.5">
-              <span className="font-display text-lg font-semibold">{option.label}</span>
+              <span className="font-display text-lg font-extrabold">{option.label}</span>
               <span className="text-sm text-ink-soft">{option.blurb}</span>
             </span>
           </button>

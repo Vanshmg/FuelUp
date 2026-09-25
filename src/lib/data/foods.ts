@@ -90,7 +90,7 @@ export const FOODS = {
   chicken_breast: {
     name: "Chicken breast", emoji: "🍗", role: "protein", aisle: "meat_seafood",
     aliases: ["chicken breast", "chicken breasts"],
-    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 2, freezer: 270 },
+    contains: ["chicken"], storage: "fridge", shelfLife: { fridge: 2, freezer: 270 },
     highRisk: true,
     storageTip: "Bottom shelf, sealed, so juices can't drip. Cook within 1–2 days or freeze. Thaw in the fridge, never on the counter.",
     serving: "4 oz", nutrition: n(140, 26, 0, 3), price: { package: "1.5 lb pack", cost: 7.49, servings: 6 },
@@ -98,7 +98,7 @@ export const FOODS = {
   chicken_thigh: {
     name: "Chicken thighs", emoji: "🍗", role: "protein", aisle: "meat_seafood",
     aliases: ["chicken thigh", "chicken thighs", "chicken"],
-    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 2, freezer: 270 },
+    contains: ["chicken"], storage: "fridge", shelfLife: { fridge: 2, freezer: 270 },
     highRisk: true,
     storageTip: "Bottom shelf, sealed, so juices can't drip. Cook within 1–2 days or freeze. Thaw in the fridge, never on the counter.",
     serving: "4 oz", nutrition: n(180, 22, 0, 10), price: { package: "1.5 lb pack", cost: 5.99, servings: 6 },
@@ -106,7 +106,7 @@ export const FOODS = {
   rotisserie_chicken: {
     name: "Rotisserie chicken", emoji: "🍗", role: "protein", aisle: "deli_ready",
     aliases: ["rotisserie chicken", "roast chicken"],
-    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 4, freezer: 120 },
+    contains: ["chicken"], storage: "fridge", shelfLife: { fridge: 4, freezer: 120 },
     highRisk: true,
     storageTip: "Fridge within 2 hours of buying. Eat within 3–4 days, or pull the meat off the bone and freeze it.",
     serving: "3 oz meat", nutrition: n(170, 23, 0, 8), price: { package: "whole chicken", cost: 7.99, servings: 5 },
@@ -114,7 +114,7 @@ export const FOODS = {
   ground_turkey: {
     name: "Ground turkey", emoji: "🦃", role: "protein", aisle: "meat_seafood",
     aliases: ["ground turkey", "turkey mince"],
-    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 2, freezer: 90 },
+    contains: ["turkey"], storage: "fridge", shelfLife: { fridge: 2, freezer: 90 },
     highRisk: true,
     storageTip: "Bottom shelf, sealed. Cook within 1–2 days or freeze. Cook until no pink remains (165°F).",
     serving: "4 oz", nutrition: n(170, 22, 0, 9), price: { package: "1 lb", cost: 5.49, servings: 4 },
@@ -146,7 +146,7 @@ export const FOODS = {
   deli_turkey: {
     name: "Deli turkey", emoji: "🦃", role: "protein", aisle: "deli_ready",
     aliases: ["deli turkey", "turkey slices", "sliced turkey", "turkey"],
-    contains: ["poultry"], storage: "fridge", shelfLife: { fridge: 14, freezer: 30, opened: { fridge: 4 } },
+    contains: ["turkey"], storage: "fridge", shelfLife: { fridge: 14, freezer: 30, opened: { fridge: 4 } },
     highRisk: true,
     storageTip: "Once opened, eat within 3–5 days. Keep it sealed and cold.",
     serving: "2 oz", nutrition: n(60, 10, 2, 1), price: { package: "8 oz pack", cost: 4.99, servings: 4 },

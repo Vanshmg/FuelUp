@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-// Fraunces (soft serif) for headings: warm, recipe-book feel.
+// Bricolage Grotesque (heavy) for headings and numbers: bold, energetic.
 // Plus Jakarta Sans for everything else: clean and very readable on phones.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
-  axes: ["SOFT", "WONK", "opsz"],
+  axes: ["opsz"],
 });
 
 const jakarta = Plus_Jakarta_Sans({
@@ -24,12 +24,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#fff8f0",
+  themeColor: "#123524",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${jakarta.variable} h-full antialiased`}>
+    <html lang="en" className={`${bricolage.variable} ${jakarta.variable} h-full antialiased`}>
       <body className="min-h-full bg-cream text-ink">{children}</body>
     </html>
   );

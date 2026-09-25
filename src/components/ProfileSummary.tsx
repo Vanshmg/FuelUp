@@ -1,4 +1,5 @@
 import { effectiveAvoidTags } from "@/lib/safety/allergens";
+import { collapseTags } from "@/lib/data/tagGroups";
 import { AVOID_OPTIONS, CUISINE_OPTIONS, DIET_OPTIONS, EFFORT_OPTIONS } from "@/lib/data/labels";
 import { formatUsd } from "@/lib/safety/budget";
 import type { Profile } from "@/lib/types";
@@ -6,7 +7,7 @@ import type { Profile } from "@/lib/types";
 /** What FuelUp knows about you, in plain words. */
 export function ProfileSummary({ profile }: { profile: Profile }) {
   const effort = EFFORT_OPTIONS[profile.effort];
-  const never = effectiveAvoidTags(profile);
+  const never = collapseTags(effectiveAvoidTags(profile));
 
   const rows: [string, React.ReactNode][] = [
     ["Effort", `${effort.emoji} ${effort.label}`],

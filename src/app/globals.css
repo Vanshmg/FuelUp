@@ -1,12 +1,15 @@
 @import "tailwindcss";
 
 /*
- * FuelUp design tokens. Warm, appetizing, calm.
- * Every color used in the app comes from here (e.g. `bg-cream`, `text-ink`).
+ * FuelUp design tokens.
+ * Forest green = fresh and healthy. Orange = energy. Warm cream = appetizing food.
+ * Every color used in the app comes from here (e.g. `bg-forest`, `text-ink`).
  *
- * Text contrast: `ink` and `ink-soft` pass WCAG AA on cream and white.
- * `tomato-deep` is the button color because white text on it passes AA;
- * plain `tomato` is for accents and large text only.
+ * Contrast rules (WCAG AA, checked):
+ * - Buttons: `bg-orange` with `text-forest-deep` (5.6:1). Never white on orange (3.05:1).
+ * - `orange` as TEXT only when large (≥ 24px, or ≥ 19px bold): on forest 4.4:1.
+ * - Small orange text on forest: `orange-bright` (5.8:1). On cream: `orange-deep` (4.6:1).
+ * - On forest, body text is `cream` (12.8:1) or `sage` (7.1:1).
  */
 @theme {
   --color-cream: #fff8f0;
@@ -17,9 +20,17 @@
   --color-ink: #2b1d14;
   --color-ink-soft: #6f5d50;
 
-  --color-tomato: #e4572e;
-  --color-tomato-deep: #c8441f;
-  --color-tomato-soft: #fde4da;
+  --color-forest: #123524;
+  --color-forest-deep: #0b2016;
+  --color-forest-tile: #1c4631;
+  --color-forest-line: #2a5a41;
+  --color-sage: #a9c2b1;
+  --color-mint: #9be3a8;
+
+  --color-orange: #f26b1d;
+  --color-orange-bright: #ff8a4c;
+  --color-orange-deep: #c8441f;
+  --color-orange-soft: #fde4d4;
 
   --color-basil: #2f7a4b;
   --color-basil-soft: #e2f1e6;
@@ -30,36 +41,48 @@
   --color-chili: #b83227;
   --color-chili-soft: #fbe1dd;
 
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 
   --radius-card: 1.25rem;
 
   --shadow-soft: 0 1px 2px rgb(43 29 20 / 0.04), 0 6px 20px rgb(43 29 20 / 0.06);
-  --shadow-lift: 0 10px 24px rgb(200 68 31 / 0.3);
+  --shadow-lift: 0 10px 24px rgb(242 107 29 / 0.32);
 
   --animate-sheet-up: sheet-up 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
   --animate-fade-in: fade-in 180ms ease-out;
+  --animate-pop: pop 260ms cubic-bezier(0.3, 1.6, 0.5, 1);
+  --animate-fill: fill 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-rise: rise 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @keyframes sheet-up {
-  from {
-    transform: translateY(24px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* A quick bounce when something gets selected. */
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Progress bars grow from empty to their value (set via --fill). */
+@keyframes fill {
+  from { width: 0; }
+  to { width: var(--fill, 100%); }
+}
+
+/* Content slides up into place on first paint. */
+@keyframes rise {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -67,6 +90,7 @@
   *::before,
   *::after {
     animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
     transition-duration: 1ms !important;
   }
 }
@@ -82,13 +106,18 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Soft, rounded display type for headings. */
 .font-display {
-  font-variation-settings: "SOFT" 100, "WONK" 0;
+  letter-spacing: -0.02em;
+}
+
+/* Selected chips and cards pop once when they turn on. */
+[aria-pressed="true"],
+[aria-checked="true"] {
+  animation: var(--animate-pop);
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-tomato);
+  outline: 3px solid var(--color-orange);
   outline-offset: 2px;
   border-radius: 0.5rem;
 }

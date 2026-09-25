@@ -5,7 +5,7 @@
  */
 import type { AvoidTag, Diet } from "@/lib/types";
 
-const MEAT: AvoidTag[] = ["poultry", "beef", "pork", "lamb"];
+const MEAT: AvoidTag[] = ["chicken", "turkey", "duck", "beef", "pork", "lamb"];
 const SEAFOOD: AvoidTag[] = ["fish", "shellfish"];
 
 export const DIET_AVOIDS: Record<Diet, AvoidTag[]> = {

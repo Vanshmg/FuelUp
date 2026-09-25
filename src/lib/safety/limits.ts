@@ -23,6 +23,7 @@
  */
 import { addDays } from "@/lib/dates";
 import { getFood } from "@/lib/data/foods";
+import { expandTags } from "@/lib/data/tagGroups";
 import type { AvoidTag, IsoDate, LogEntry, Meal, MealSlot, WeekPlan, WeeklyLimit } from "@/lib/types";
 import { describePlace, tagsInText } from "./allergens";
 import { makeIssue, TAG_LABELS, type SafetyIssue } from "./issues";
@@ -31,16 +32,21 @@ export const WINDOW_DAYS = 7;
 
 const SLOT_ORDER: Record<MealSlot, number> = { breakfast: 0, lunch: 1, dinner: 2, snack: 3 };
 
+/** Does this food contain the tag? A group tag (poultry) matches any member. */
+function containsTag(foodId: Meal["items"][number]["foodId"], tag: AvoidTag): boolean {
+  const members = expandTags([tag]);
+  return getFood(foodId).contains.some((t) => members.includes(t));
+}
+
 export function mealHasTag(meal: Pick<Meal, "name" | "items" | "recipeQuery">, tag: AvoidTag): boolean {
-  if (meal.items.some((item) => getFood(item.foodId).contains.includes(tag))) return true;
+  if (meal.items.some((item) => containsTag(item.foodId, tag))) return true;
   return tagsInText(`${meal.name} ${meal.recipeQuery ?? ""}`, [tag]).length > 0;
 }
 
 export function logHasTag(entry: LogEntry, tag: AvoidTag): boolean {
   return entry.items.some(
     (item) =>
-      (item.foodId !== undefined && getFood(item.foodId).contains.includes(tag)) ||
-      tagsInText(item.label, [tag]).length > 0,
+      (item.foodId !== undefined && containsTag(item.foodId, tag)) || tagsInText(item.label, [tag]).length > 0,
   );
 }
 

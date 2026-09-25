@@ -20,7 +20,7 @@ import { perServingCostCents } from "./budget";
 import type { SafetyIssue } from "./issues";
 import { checkPlanChange, type Verified, type VerifyContext } from "./verify";
 
-const ANIMAL_TAGS: AvoidTag[] = ["poultry", "beef", "pork", "lamb", "fish", "shellfish"];
+const ANIMAL_TAGS: AvoidTag[] = ["chicken", "turkey", "duck", "beef", "pork", "lamb", "fish", "shellfish"];
 
 export interface Swap {
   foodId: FoodId;

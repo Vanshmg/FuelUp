@@ -32,7 +32,10 @@ export const AVOID_TAGS = [
   "shellfish",
   "sesame",
   "chocolate",
-  "poultry",
+  "poultry", // a GROUP: means chicken + turkey + duck (see data/tagGroups.ts)
+  "chicken",
+  "turkey",
+  "duck",
   "beef",
   "pork",
   "lamb",

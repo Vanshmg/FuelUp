@@ -17,7 +17,7 @@ export function LogButton() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="pointer-events-auto flex min-h-13 items-center gap-2 rounded-full bg-tomato-deep px-5 font-semibold text-white shadow-lift transition-transform hover:scale-[1.03] active:scale-[0.98]"
+          className="pointer-events-auto flex min-h-13 items-center gap-2 rounded-full bg-orange px-5 font-bold text-forest-deep shadow-lift transition-transform duration-150 hover:scale-[1.04] active:scale-[0.94]"
         >
           <PlusIcon width={20} height={20} />
           Log

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { BackIcon } from "@/components/ui/icons";
+import { Logo } from "@/components/Logo";
 import { PersonaPicker } from "@/components/PersonaPicker";
 import { PROFILE_DEFAULTS } from "@/lib/data/defaults";
 import { saveProfile } from "@/lib/storage";
@@ -80,29 +81,32 @@ const STEP_COPY: Record<1 | 2 | 3, { title: string; subtitle: string }> = {
 
 function Welcome({ onStart, onDemo }: { onStart: () => void; onDemo: () => void }) {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-between px-6 pt-16 pb-10">
-      <div className="flex flex-col gap-5">
-        <div className="flex gap-2 text-5xl" aria-hidden>
-          <span>🥗</span>
-          <span>🍛</span>
-          <span>🌮</span>
+    <div className="min-h-dvh bg-forest text-cream">
+      <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-between px-6 pt-14 pb-10">
+        <div className="flex flex-col">
+          <Logo tone="dark" size={36} className="animate-rise" />
+          <div className="mt-14 flex gap-2 text-5xl animate-rise [animation-delay:80ms]" aria-hidden>
+            <span>🍛</span>
+            <span>🌮</span>
+            <span>🥗</span>
+          </div>
+          <h1 className="mt-5 font-display text-[3.6rem] leading-[0.95] font-extrabold tracking-tight animate-rise [animation-delay:160ms]">
+            Prep your meals <span className="text-orange">smarter.</span>
+          </h1>
+          <p className="mt-5 text-base leading-snug text-sage animate-rise [animation-delay:240ms]">
+            Built for off-campus students. Familiar meals, on budget, safe for you.
+          </p>
         </div>
-        <h1 className="font-display text-5xl leading-[1.05] font-semibold tracking-tight">
-          Prep your meals <span className="text-tomato">smarter.</span>
-        </h1>
-        <p className="text-lg leading-relaxed text-ink-soft">
-          Meal plans built around your effort level, your restrictions, your budget, and the food you already know.
-        </p>
-      </div>
-      <div className="flex flex-col gap-3">
-        <Button size="lg" onClick={onStart}>
-          Get started · 3 quick questions
-        </Button>
-        <Button size="lg" variant="secondary" onClick={onDemo}>
-          Load demo data
-        </Button>
-      </div>
-    </main>
+        <div className="flex flex-col gap-3 animate-rise [animation-delay:320ms]">
+          <Button size="lg" onClick={onStart}>
+            Get started · 3 quick questions →
+          </Button>
+          <Button size="lg" variant="onDark" onClick={onDemo}>
+            Load demo data
+          </Button>
+        </div>
+      </main>
+    </div>
   );
 }
 
@@ -135,15 +139,21 @@ function Frame({
         {progress !== undefined && (
           <div className="flex flex-1 gap-1.5" role="progressbar" aria-valuemin={1} aria-valuemax={3} aria-valuenow={progress} aria-label={`Question ${progress} of 3`}>
             {[1, 2, 3].map((n) => (
-              <span key={n} className={`h-1.5 flex-1 rounded-full ${n <= progress ? "bg-tomato" : "bg-line"}`} />
+              <span key={n} className="h-2 flex-1 overflow-hidden rounded-full bg-line">
+                {/* Fills in as you move forward. */}
+                <span
+                  className="block h-full rounded-full bg-orange transition-[width] duration-500 ease-out"
+                  style={{ width: n <= progress ? "100%" : "0%" }}
+                />
+              </span>
             ))}
           </div>
         )}
       </div>
 
       <header className="mt-6 mb-6 flex flex-col gap-2">
-        {progress !== undefined && <p className="text-sm font-semibold text-tomato-deep">Question {progress} of 3</p>}
-        <h1 className="font-display text-3xl leading-tight font-semibold">{title}</h1>
+        {progress !== undefined && <p className="text-sm font-semibold text-orange-deep">Question {progress} of 3</p>}
+        <h1 className="font-display text-[2rem] leading-[1.05] font-extrabold tracking-tight text-forest">{title}</h1>
         <p className="text-ink-soft">{subtitle}</p>
       </header>
 

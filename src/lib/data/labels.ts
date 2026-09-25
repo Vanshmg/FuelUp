@@ -1,5 +1,5 @@
 /** Friendly names and emoji for every choice the user sees. */
-import type { AvoidTag, Cuisine, Diet, EffortLevel } from "@/lib/types";
+import type { AvoidTag, Cuisine, DayType, Diet, EffortLevel } from "@/lib/types";
 
 export const EFFORT_OPTIONS: Record<EffortLevel, { emoji: string; label: string; blurb: string }> = {
   zero_cook: {
@@ -52,8 +52,18 @@ export const AVOID_OPTIONS: Record<AvoidTag, { emoji: string; label: string }> =
   shellfish: { emoji: "🦐", label: "Shellfish" },
   sesame: { emoji: "🥯", label: "Sesame" },
   chocolate: { emoji: "🍫", label: "Chocolate" },
-  poultry: { emoji: "🍗", label: "Chicken & turkey" },
+  poultry: { emoji: "🐓", label: "All poultry" },
+  chicken: { emoji: "🍗", label: "Chicken" },
+  turkey: { emoji: "🦃", label: "Turkey" },
+  duck: { emoji: "🦆", label: "Duck" },
   beef: { emoji: "🥩", label: "Beef" },
   pork: { emoji: "🥓", label: "Pork" },
   lamb: { emoji: "🐑", label: "Lamb" },
+};
+
+export const DAY_TYPE_LABELS: Record<DayType, string> = {
+  packed: "Packed day",
+  busy: "Busy day",
+  free: "Free day",
+  out: "Eating out",
 };

@@ -57,7 +57,7 @@ export function Sheet({
       >
         <div aria-hidden className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-line" />
         <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 id={titleId} className="font-display text-2xl font-semibold">
+          <h2 id={titleId} className="font-display text-2xl font-extrabold">
             {title}
           </h2>
           <button

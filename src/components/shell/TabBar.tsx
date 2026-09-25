@@ -15,7 +15,7 @@ export function TabBar() {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card/95 backdrop-blur">
+    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 bg-forest">
       <ul className="mx-auto flex max-w-md justify-around px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {TABS.map(({ href, label, Icon }) => {
           const active = pathname.startsWith(href);
@@ -26,10 +26,15 @@ export function TabBar() {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex flex-col items-center gap-0.5 pt-2.5 pb-1 text-xs font-semibold transition-colors",
-                  active ? "text-tomato-deep" : "text-ink-soft hover:text-ink",
+                  active ? "text-orange-bright" : "text-sage hover:text-cream",
                 )}
               >
-                <span className={cn("flex h-8 w-14 items-center justify-center rounded-full", active && "bg-tomato-soft")}>
+                <span
+                  className={cn(
+                    "flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-200",
+                    active && "animate-pop bg-forest-tile",
+                  )}
+                >
                   <Icon />
                 </span>
                 {label}
