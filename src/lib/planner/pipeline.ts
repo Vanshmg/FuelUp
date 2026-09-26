@@ -40,9 +40,11 @@ interface Attempt {
   plan: WeekPlan;
   /** Meals dropped before verification (unknown ingredients). */
   gaps: PlanGap[];
-  /** Every problem, for the retry message: structure, unknown ingredients, safety. */
+  /** Every problem, for the retry message: structure, unknown ingredients, safety, budget. */
   problems: string[];
   blocking: boolean;
+  /** Over budget is a warning, not a safety block, but it's worth one retry. */
+  overBudget: boolean;
 }
 
 type AttemptOutcome = { ok: true; attempt: Attempt } | { ok: false; reason: string };
@@ -91,7 +93,7 @@ function toWeekPlan(raw: unknown, days: readonly PlanDay[], opts: PipelineOption
   }));
 
   const plan: WeekPlan = { id: opts.planId, startDate: days[0].date, createdAt: opts.createdAt, source: "ai", days: planDaysOut };
-  return { ok: true, attempt: { plan, gaps, problems, blocking: gaps.length > 0 || problems.length > 0 } };
+  return { ok: true, attempt: { plan, gaps, problems, blocking: gaps.length > 0 || problems.length > 0, overBudget: false } };
 }
 
 async function runAttempt(
@@ -122,6 +124,7 @@ async function runAttempt(
       ...attempt,
       problems: [...attempt.problems, ...issues.map((issue) => issue.message)],
       blocking: attempt.blocking || issues.some((issue) => issue.severity === "block"),
+      overBudget: issues.some((issue) => issue.code === "over_budget"),
     },
   };
 }
@@ -158,8 +161,9 @@ export async function planWeek(req: PlanRequest, ai: JsonAi | null, opts: Pipeli
     return finish(second.attempt, req, 2);
   }
 
-  // Attempt 1 usable but has problems: one retry with the exact problems.
-  if (first.attempt.blocking) {
+  // Attempt 1 usable but has safety problems or is over budget: ONE retry,
+  // sending the exact problems (for budget: the total and what to reuse).
+  if (first.attempt.blocking || first.attempt.overBudget) {
     const second = await runAttempt(ai, buildPlanPrompt(req, days, first.attempt.problems), schema, days, req, opts);
     // If the retry itself fails, keep attempt 1: enforcePlan removes its unsafe meals.
     return finish(second.ok ? second.attempt : first.attempt, req, 2);

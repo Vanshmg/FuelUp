@@ -130,6 +130,39 @@ describe("planWeek: the AI path", () => {
   });
 });
 
+describe("planWeek: budget", () => {
+  // One-off pricey items every day: a whole kimbap roll, shrimp, a pizza…
+  const pricey = aiWeek(() => [
+    { slot: "breakfast", name: "Kimbap breakfast", foods: ["frozen_kimbap"] },
+    { slot: "lunch", name: "Shrimp rice", foods: ["shrimp", "white_rice"] },
+    { slot: "dinner", name: "Pizza night", foods: ["frozen_pizza", "romaine"] },
+  ]);
+
+  it("over budget triggers ONE retry that sends the total and asks to reuse ingredients", async () => {
+    const ai = fakeAi(pricey, aiWeek(safeDay));
+    const result = await planWeek(requestFor("jae"), ai, OPTS);
+    expect(result.attempts).toBe(2);
+    expect(ai.calls[1]).toMatch(/groceries come to about \$\d+/);
+    expect(ai.calls[1]).toContain("over your $40 weekly budget");
+    expect(ai.calls[1]).toContain("Reuse the same ingredients");
+    expect(mealsOf(result.plan).map((m) => m.name)).not.toContain("Kimbap breakfast");
+  });
+
+  it("still over budget after the retry → plan kept (budget is a warning, not a safety block)", async () => {
+    const result = await planWeek(requestFor("jae"), fakeAi(pricey, pricey), OPTS);
+    expect(mealsOf(result.plan)).toHaveLength(21);
+    expect(verifyPlan(result.plan, toVerifyContext(requestFor("jae"))).map((i) => i.code)).toContain("over_budget");
+  });
+
+  it("tells Gemini package sizes and which staples are free", () => {
+    const req = requestFor("arjun");
+    const prompt = buildPlanPrompt(req, planDays(req.profile, TODAY));
+    expect(prompt).toContain("egg (Eggs, protein, $3.99 buys 6 servings)");
+    expect(prompt).toContain("cumin (Cumin, spice, staple, already at home)");
+    expect(prompt).toContain("SHORT shopping list");
+  });
+});
+
 describe("planWeek: never crashes, falls back instead", () => {
   it("no key → built-in plan with a friendly notice", async () => {
     const result = await planWeek(requestFor("sofia"), null, OPTS);

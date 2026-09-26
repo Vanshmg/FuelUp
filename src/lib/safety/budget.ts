@@ -51,6 +51,7 @@ export interface GroceryNeed {
  * What the plan needs from the store, in whole packages.
  * - Batch meals need all their portions; leftover meals need nothing new.
  * - Ingredients linked to a pantry item are already at home.
+ * - Staples (spices, oils) are assumed at home: a pinch isn't a purchase.
  * - A food with a pantry item still good at the plan's start is treated as
  *   covered (we don't track exact amounts at home; this is an estimate).
  */
@@ -60,7 +61,7 @@ export function groceryNeeds(plan: WeekPlan, pantry: readonly PantryItem[]): Gro
     for (const meal of day.meals) {
       if (meal.leftoverOf) continue;
       for (const item of meal.items) {
-        if (item.pantryItemId) continue;
+        if (item.pantryItemId || getFood(item.foodId).staple) continue;
         servingsByFood.set(item.foodId, (servingsByFood.get(item.foodId) ?? 0) + item.servings * meal.portions);
       }
     }
@@ -77,6 +78,23 @@ export function groceryNeeds(plan: WeekPlan, pantry: readonly PantryItem[]): Gro
     needs.push({ foodId, servings, packages, price: fromCents(packages * toCents(getFood(foodId).price.cost)) });
   }
   return needs;
+}
+
+export interface BudgetBreakdown {
+  total: number;
+  /** The priciest packages first, with how many of their servings the plan leaves unused. */
+  items: (GroceryNeed & { unusedServings: number })[];
+}
+
+export function budgetBreakdown(plan: WeekPlan, pantry: readonly PantryItem[]): BudgetBreakdown {
+  const needs = groceryNeeds(plan, pantry);
+  const items = needs
+    .map((need) => ({
+      ...need,
+      unusedServings: Math.max(0, Math.round((need.packages * getFood(need.foodId).price.servings - need.servings) * 10) / 10),
+    }))
+    .sort((a, b) => b.price - a.price);
+  return { total: sumPrices(needs.map((need) => need.price)), items };
 }
 
 export function sumPrices(prices: readonly number[]): number {

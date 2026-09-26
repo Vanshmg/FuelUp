@@ -8,7 +8,9 @@ import { formatUsd } from "@/lib/safety/budget";
 import { weeklyBudgetStatus } from "@/lib/selectors";
 import type { AppState, Profile } from "@/lib/types";
 import { Logo } from "@/components/Logo";
+import { LogButton } from "./LogButton";
 import { MenuSheet } from "./MenuSheet";
+import { TopNav } from "./TopNav";
 
 /** Logo, the budget chip ("$12 left this week"), and the menu. */
 export function AppHeader({ state, profile }: { state: AppState; profile: Profile }) {
@@ -19,10 +21,16 @@ export function AppHeader({ state, profile }: { state: AppState; profile: Profil
   // Not sticky: it scrolls away with the page, so it never covers content.
   return (
     <header className="bg-forest">
-      <div className="mx-auto flex h-16 max-w-md items-center justify-between gap-3 px-5">
-        <Logo tone="dark" size={30} />
+      <div className="mx-auto flex h-16 max-w-md items-center justify-between gap-3 px-5 lg:h-20 lg:max-w-6xl lg:px-8">
+        <div className="flex items-center gap-8">
+          <Logo tone="dark" size={30} />
+          <TopNav />
+        </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 lg:gap-3">
+          <span className="hidden lg:inline-flex">
+            <LogButton />
+          </span>
           <span
             className={cn(
               "rounded-full px-3 py-1.5 text-sm font-semibold",

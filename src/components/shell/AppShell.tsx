@@ -25,10 +25,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Bottom padding = tab bar height + breathing room, so nothing hides behind it.
   return (
-    <div className="min-h-dvh pb-32">
+    <div className="min-h-dvh pb-32 lg:pb-12">
       <AppHeader state={state} profile={state.profile} />
       {notices.length > 0 && (
-        <div role="status" className="mx-auto mt-3 flex max-w-md items-start gap-3 px-5">
+        <div role="status" className="mx-auto mt-3 flex max-w-md items-start gap-3 px-5 lg:max-w-6xl lg:px-8">
           <div className="flex flex-1 items-start gap-3 rounded-card border border-mustard/30 bg-mustard-soft p-4 text-sm">
             <span aria-hidden>⚠️</span>
             <p className="flex-1">{notices.join(" ")}</p>
@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
-      <main className="mx-auto max-w-md px-5 pt-5">{children}</main>
+      <main className="mx-auto max-w-md px-5 pt-5 lg:max-w-6xl lg:px-8 lg:pt-8">{children}</main>
       <TabBar />
     </div>
   );

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { GroceryListItem, PantryItem } from "@/lib/types";
-import { budgetStatus, formatUsd, groceryNeeds, listTotal, mealCost, packagesFor, spentThisWeek, sumPrices } from "./budget";
+import { budgetBreakdown, budgetStatus, formatUsd, groceryNeeds, listTotal, mealCost, packagesFor, spentThisWeek, sumPrices } from "./budget";
 import { meal, planFrom } from "./testHelpers";
 
 const line = (price: number): GroceryListItem => ({ foodId: "egg", packages: 1, price, priceEdited: false, bought: false });
@@ -63,5 +63,19 @@ describe("meal cost vs grocery cost", () => {
     });
     const pantry = [bought("2026-09-19", 5), bought("2026-09-21", 3.99), bought("2026-09-23", 2.5), bought("2026-09-24")];
     expect(spentThisWeek(pantry, "2026-09-25", "2026-09-21")).toBe(6.49);
+  });
+});
+
+describe("budget realism", () => {
+  it("treats staples (spices, oils) as already at home", () => {
+    const plan = planFrom("2026-09-25", [[meal("Dal", ["red_lentils", "cumin", "garam_masala", "olive_oil"])]]);
+    expect(groceryNeeds(plan, []).map((n) => n.foodId)).toEqual(["red_lentils"]);
+  });
+
+  it("names the priciest packages and their unused servings", () => {
+    const plan = planFrom("2026-09-25", [[meal("Protein bar", ["protein_bar"]), meal("Eggs", ["egg"])]]);
+    const breakdown = budgetBreakdown(plan, []);
+    expect(breakdown.total).toBe(23.98);
+    expect(breakdown.items[0]).toMatchObject({ foodId: "protein_bar", price: 19.99, unusedServings: 11 });
   });
 });

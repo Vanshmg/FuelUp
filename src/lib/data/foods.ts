@@ -72,6 +72,12 @@ export interface FoodDef {
   highRisk?: true;
   /** Short, friendly storage advice shown when a high-risk item is marked bought. */
   storageTip?: string;
+  /**
+   * Pantry staples (spices, oils) students keep at home and use a pinch of.
+   * Assumed already at home: never added to the grocery list or budget.
+   * Still allergen-checked like everything else.
+   */
+  staple?: true;
   shelfLife: ShelfLife;
   serving: string;
   nutrition: Nutrition;
@@ -892,6 +898,7 @@ export const FOODS = {
     name: "Sesame oil", role: "fat_oil", aisle: "sauces_spices",
     aliases: ["sesame oil", "toasted sesame oil"],
     contains: ["sesame"], storage: "pantry", shelfLife: { pantry: 365, opened: { pantry: 180 } },
+    staple: true,
     serving: "1 tsp", nutrition: n(40, 0, 0, 5), price: { package: "5 oz bottle", cost: 4.99, servings: 30 },
   },
   fish_sauce: {
@@ -1015,12 +1022,14 @@ export const FOODS = {
     name: "Olive oil", emoji: "🫒", role: "fat_oil", aisle: "sauces_spices",
     aliases: ["olive oil", "evoo"],
     contains: [], storage: "pantry", shelfLife: { pantry: 540 },
+    staple: true,
     serving: "1 tbsp", nutrition: n(120, 0, 0, 14), price: { package: "500 ml bottle", cost: 8.99, servings: 33 },
   },
   vegetable_oil: {
     name: "Vegetable oil", role: "fat_oil", aisle: "sauces_spices",
     aliases: ["vegetable oil", "canola oil", "cooking oil", "oil"],
     contains: [], storage: "pantry", shelfLife: { pantry: 365 },
+    staple: true,
     serving: "1 tbsp", nutrition: n(120, 0, 0, 14), price: { package: "48 oz bottle", cost: 4.49, servings: 90 },
   },
   honey: {
@@ -1033,18 +1042,21 @@ export const FOODS = {
     name: "Garam masala", role: "spice", aisle: "sauces_spices",
     aliases: ["garam masala"],
     contains: [], storage: "pantry", shelfLife: { pantry: 365 },
+    staple: true,
     serving: "1 tsp", nutrition: n(5, 0, 1, 0), price: { package: "3 oz jar", cost: 4.99, servings: 50 },
   },
   cumin: {
     name: "Cumin", role: "spice", aisle: "sauces_spices",
     aliases: ["cumin", "jeera"],
     contains: [], storage: "pantry", shelfLife: { pantry: 365 },
+    staple: true,
     serving: "1 tsp", nutrition: n(8, 0, 1, 1), price: { package: "2 oz jar", cost: 3.99, servings: 50 },
   },
   taco_seasoning: {
     name: "Taco seasoning", role: "spice", aisle: "sauces_spices",
     aliases: ["taco seasoning"],
     contains: [], mayContain: ["wheat", "soy", "dairy"], storage: "pantry", shelfLife: { pantry: 365 },
+    staple: true,
     serving: "2 tsp", nutrition: n(20, 0, 4, 0), price: { package: "1 oz packet", cost: 1.29, servings: 4 },
   },
 } satisfies Record<string, FoodDef>;

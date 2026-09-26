@@ -38,8 +38,15 @@ const EFFORT_GUIDE = {
   likes_cooking: "LIKES COOKING: real recipes are welcome, especially batch dishes on free days.",
 } as const;
 
+/** One compact entry per food, with its package so the AI can plan to use packages up. */
 function foodLines(ids: readonly FoodId[]): string {
-  return ids.map((id) => `${id} (${getFood(id).name}, ${getFood(id).role})`).join("; ");
+  return ids
+    .map((id) => {
+      const food = getFood(id);
+      const buy = food.staple ? "staple, already at home" : `${formatUsd(food.price.cost)} buys ${food.price.servings} servings`;
+      return `${id} (${food.name}, ${food.role}, ${buy})`;
+    })
+    .join("; ");
 }
 
 function kitchenLines(req: PlanRequest, startDate: IsoDate): string[] {
@@ -73,7 +80,7 @@ function sharedContext(req: PlanRequest, startDate: IsoDate): string {
     `EFFORT: ${EFFORT_GUIDE[profile.effort]} (${EFFORT_OPTIONS[profile.effort].label})`,
     `CUISINES THEY KNOW: ${profile.cuisines.map((c) => CUISINE_OPTIONS[c].label).join(", ")}. Most meals should come from these.`,
     `GOAL: ${profile.nutritionGoal.replace("_", " ")}; about ${profile.proteinTargetG} g protein a day.`,
-    `BUDGET: about ${formatUsd(profile.weeklyBudget)} a week for groceries. Prefer cheap staples and reuse ingredients across meals.`,
+    `BUDGET: ${formatUsd(profile.weeklyBudget)} for the WHOLE week of groceries. Groceries come in whole packages (see "buys N servings"), so keep the shopping list short.`,
     "",
     "ALLOWED FOODS (use ONLY these ids as ingredients; nothing else exists):",
     foodLines(allowed),
@@ -96,7 +103,8 @@ const PLAN_RULES = `RULES
 5. Familiar first: at most ONE meal with isNew = true, one small step from what they already eat.
 6. Healthy but realistic: protein in most meals, a fruit or vegetable most days. Snacks are fine; make them better choices (e.g. roasted chickpeas instead of chips).
 7. Meal names are specific and appetizing. recipeQuery = a few search words for a recipe video.
-8. prepMinutes must fit the day type and effort level.`;
+8. prepMinutes must fit the day type and effort level.
+9. BUDGET: build the week around a SHORT shopping list. Reuse the same few proteins, grains, and vegetables across several meals so every package gets used up (a dozen eggs = 6 servings; a bag of rice lasts all week). Avoid ingredients used only once. Staples marked "already at home" cost nothing.`;
 
 export function buildPlanPrompt(req: PlanRequest, days: readonly PlanDay[], problems: readonly string[] = []): string {
   const startDate = days[0].date;

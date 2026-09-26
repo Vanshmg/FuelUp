@@ -17,7 +17,7 @@
 import { getFood } from "@/lib/data/foods";
 import type { IsoDate, LogEntry, Meal, PantryItem, Profile, WeekPlan } from "@/lib/types";
 import { checkMealAllergens, describePlace, effectiveAvoidTags } from "./allergens";
-import { formatUsd, groceryNeeds, sumPrices } from "./budget";
+import { budgetBreakdown, formatUsd } from "./budget";
 import { expiresOn, freshPurchaseUseBy, isGoodOn, LEFTOVER_SHELF_LIFE, lastGoodDay } from "./expiry";
 import { makeIssue, type SafetyIssue } from "./issues";
 import { checkWeeklyLimits } from "./limits";
@@ -170,13 +170,28 @@ function checkNewDishes(meals: DatedMeal[]): SafetyIssue[] {
     );
 }
 
+/**
+ * Groceries are bought in whole packages, so a week of one-off ingredients
+ * costs far more than the per-meal numbers suggest. The message names the
+ * priciest packages and their unused servings, so both the user and the AI
+ * retry know exactly what to reuse or cut.
+ */
 function checkBudget(plan: WeekPlan, ctx: VerifyContext): SafetyIssue[] {
-  const total = sumPrices(groceryNeeds(plan, ctx.pantry).map((need) => need.price));
+  const { total, items } = budgetBreakdown(plan, ctx.pantry);
   if (total <= ctx.profile.weeklyBudget) return [];
+  const priciest = items
+    .slice(0, 3)
+    .map((item) => {
+      const name = getFood(item.foodId).name;
+      const unused = item.unusedServings >= 1 ? `, ${item.unusedServings} of its servings unused` : "";
+      return `${name} ${formatUsd(item.price)}${unused}`;
+    })
+    .join("; ");
   return [
     makeIssue(
       "over_budget",
-      `This plan's groceries come to about ${formatUsd(total)}, over your ${formatUsd(ctx.profile.weeklyBudget)} budget by ${formatUsd(total - ctx.profile.weeklyBudget)}.`,
+      `This plan's groceries come to about ${formatUsd(total)}, over your ${formatUsd(ctx.profile.weeklyBudget)} weekly budget by ${formatUsd(total - ctx.profile.weeklyBudget)}. ` +
+        `Priciest: ${priciest}. Reuse the same ingredients across more meals so packages get used up, and cut one-off items.`,
     ),
   ];
 }
