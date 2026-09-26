@@ -16,7 +16,7 @@ Allergies make it harder. Most food apps treat them as an afterthought; FuelUp t
 
 ## Who it's for
 
-Off-campus students in the US, from any background and cuisine:
+Off-campus students, from any background and cuisine:
 
 | Student | What FuelUp does |
 |---|---|
